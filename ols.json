@@ -1,12 +1,30 @@
 {
   "$schema": "https://raw.githubusercontent.com/DanielGavin/ols/master/misc/ols.schema.json",
-  "enable_semantic_tokens": true,
+  "checker_args": null,
+  "collections": [
+    {
+      "name": "lib",
+      "path": "/nix/store/9ahk1agh3zbc2xva9fwcpbcy6kpf8rra-odinLib"
+    }
+  ],
+  "enable_auto_import": false,
+  "enable_checker_only_saved": true,
+  "enable_comp_lit_signature_help": true,
+  "enable_completion_matching": true,
+  "enable_document_highlights": true,
+  "enable_document_links": true,
   "enable_document_symbols": true,
+  "enable_fake_methods": false,
+  "enable_format": true,
   "enable_hover": true,
-  "enable_snippets": true,
-  "enable_references": true,
-  "enable_inlay_hints": true,
-  "enable_procedure_context": true,
+  "enable_inlay_hints_default_params": true,
+  "enable_inlay_hints_implicit_return": true,
+  "enable_inlay_hints_params": true,
   "enable_procedure_snippet": true,
-  "enable_rename": true
+  "enable_references": true,
+  "enable_semantic_tokens": true,
+  "enable_snippets": true,
+  "odin_command": "/nix/store/ixnhnli9zbff85rggcfc2v7n3gd5j1s8-odin-dev-2025-11/bin/odin",
+  "odin_root_override": "/nix/store/ixnhnli9zbff85rggcfc2v7n3gd5j1s8-odin-dev-2025-11/share",
+  "verbose": false
 }

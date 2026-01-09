@@ -1,10 +1,16 @@
-[
-  {
-    pname = "odin-sudoku";
-    version = "0.1";
-    src = ./src/main;
-    libs.import = ["waffle"];
-    raylib.enable = true;
-    nativeBuildInputs = ["qqwing"];
-  }
-]
+rec {
+  packageName = "projectName";
+  modules = [
+    (
+      { pkgs, ... }:
+      {
+        pname = "odin-sudoku";
+        version = "0.1";
+        src = ./src;
+        libs.import = [ "waffle" ];
+        raylib.enable = true;
+        nativeBuildInputStrs = [ "qqwing" ];
+      }
+    )
+  ];
+}

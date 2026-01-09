@@ -2,55 +2,39 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    nixvim.url = "github:bauers-lab-jared/nixvim";
-    nix-odin.url = "github:bauers-lab-jared/nix-odin";
+    nix-odin.url = "https://git.sgtwaffle.com/sgtwaffle/nix-odin/archive/main.tar.gz";
+    nixvim-waffle.url = "https://git.sgtwaffle.com/wafip/nixvim/archive/main.tar.gz";
+    #Copy the above and replace "waffle" with other user to add other editor configs.
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-    ...
-  }: let
-    inherit (self.inputs) nix-odin;
-    out = system: let
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [nix-odin.overlays.default];
-      };
-      nixvimPkgs = self.inputs.nixvim.inputs.nixpkgs.legacyPackages.${system};
-      appliedOverlay = self.overlays.default pkgs pkgs;
-    in {
-      packages = {
-        inherit (appliedOverlay) default;
-      };
-      odinConfig = appliedOverlay.default.cfg;
-      devShells.default = pkgs.mkShell {
-        inherit (appliedOverlay.default) nativeBuildInputs buildInputs;
-        LD_LIBRARY_PATH = "$LD_LIBRARY_PATH:${
-          pkgs.lib.makeLibraryPath appliedOverlay.default.buildInputs
-        }";
-
-        #        TEST_CMD = odinConfig.cli.test.cmd;
-        #        DEBUG_CMD = odinConfig.cli.debug.cmd;
-
-        packages = [
-          (self.inputs.nixvim.lib.mkNixvim {
-            pkgs = nixvimPkgs;
-            addons = [
-              #"proj-html" use this for web projects
-              "proj-odin"
-              "proj-nix"
-            ];
-          })
-        ];
-      };
-    };
-  in
-    flake-utils.lib.eachDefaultSystem out
-    // {
-      overlays.default = final: prev: {
-        default = final.callPackage (final.buildOdin (import ./config.nix)) {};
-      };
-    };
+  outputs =
+    {
+      self,
+      nix-odin,
+      nixpkgs,
+      flake-utils,
+      ...
+    }:
+    let
+      nixvim-user = "waffle";
+      packageConfig = import ./config.nix;
+      localOverlays = [
+      ];
+      propagatedOverlays = [
+        #use this to import nix odin libs
+      ];
+    in
+    # For an odin library use mkOdinLibFlake.out/overlay instead
+    (nix-odin.lib.mkOdinFlake.out {
+      inherit
+        self
+        nixpkgs
+        nix-odin
+        flake-utils
+        packageConfig
+        nixvim-user
+        localOverlays
+        ;
+    })
+    // nix-odin.lib.mkOdinFlake.overlay { inherit nix-odin packageConfig propagatedOverlays; };
 }

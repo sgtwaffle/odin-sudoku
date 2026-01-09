@@ -1,77 +1,71 @@
-version: "3"
+version: 3
+silent: true
 interval: 500ms
 tasks:
   default:
     cmds:
-      - task: env-reload
-  env-reload:
+      - task: env
+  env:
     cmds:
       - direnv reload
       - nix-direnv-reload
-    aliases:
-      - env
+      - updateOlsConfig
   git-gud:
     cmds:
       - git add --all
+    silent: true
   run:
-    deps:
-      - git-gud
     cmds:
-      - nix run . --show-trace
+      - task: git-gud
+      - nix run
+  build-glsl:
+    sources:
+      - ./src/main/**/*.glsl
+    cmds:
+      - for: sources
+        cmd: |
+          sokol-shdc -i {{.ITEM}} \
+          -o {{replace ".glsl" ".odin" .ITEM}} \
+          -l "$(nix eval --raw ".#odinConfig.${system}.extraEnvVars.SLANG")" \
+          -f "sokol_odin"
+    method: none
   debug:
     deps:
       - build-debug
     cmds:
-      - gdb debug/main --tui
+      - debug-tui
     aliases:
       - d
   debug-dap:
-    cmds:
-      - gdb debug/main -i dap
-  build:
     deps:
-      - git-gud
+      - build-debug
     cmds:
-      - nix build . --show-trace
-    aliases:
-      - b
-  build-test:
+      - debug-dap
+  debug-test:
     deps:
-      - git-gud
-      - mkdir-test
+      - build-debug-test
     cmds:
-      - eval cmd="$(nix eval ".#odinConfig.${system}.cli.test.cmd")" && eval "$cmd"
+      - debugTest-tui
     aliases:
-      - test
-    env:
-      src: ./src/main/
-  mkdir-test:
+      - d
+  debug-test-dap:
+    deps:
+      - build-debug-test
     cmds:
-      - rm -r test || true
-      - mkdir test
-    internal: true
-  mkdir-debug:
+      - debugTest-dap
+  test:
     cmds:
-      - rm -r debug || true
-      - mkdir debug
-    internal: true
+      - task: git-gud
+      - runTest
   build-debug:
-    deps:
-      - mkdir-debug
     cmds:
-      - eval cmd="$(nix eval ".#odinConfig.${system}.cli.debug.cmd")" && eval "$cmd"
+      - task: git-gud
+      - buildDebug
     aliases:
       - bd
-    env:
-      src: ./src/main/
-  watch:
-    watch: true
-    sources:
-      - "src/**/*.odin"
+  build-debug-test:
     cmds:
-      - task: test
-  watch-run:
-    sources:
-      - "src/**/*.odin"
-    cmds:
-      - task: run
+      - task: git-gud
+      - buildDebugTest
+    aliases:
+      - bdt
